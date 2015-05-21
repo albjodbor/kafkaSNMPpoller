@@ -96,7 +96,7 @@ void produce_msg (char * cadena) {
 *
 * Returns the number of events served.
 */
-void poll_kafka (void * thread_args) {
+void * poll_kafka (void * thread_args) {
 	//TODO -> ver como obtener tamanio del poll
 	while (fin) {
 		/**
@@ -114,6 +114,7 @@ void poll_kafka (void * thread_args) {
 		rd_kafka_poll(rk, 0);
 	}
 	//TODO ¿Se sale cuando ha finalizado?
+	return 0;
 }
 
 

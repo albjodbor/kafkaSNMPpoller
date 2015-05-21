@@ -16,4 +16,4 @@ void produce_msg (char * cadena);
 /*
  * Funcion ejecutada por el hilo que ira haciendo poll
  */
-void poll_kafka (void * thread_args);
+void * poll_kafka (void * thread_args);
