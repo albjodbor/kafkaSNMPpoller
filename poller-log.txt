@@ -1,0 +1,11 @@
+Thu May 21 13:18:39 2015 Iniciando el programa.... [poller.c][line: 65] 
+Thu May 21 13:18:39 2015 Intento con exito para kafka handle [poller.c][line: 91] 
+Thu May 21 13:18:39 2015 Intento con exito para kafka broker [poller.c][line: 104] 
+Thu May 21 13:18:39 2015 RDKAFKA: localhost:9092/bootstrap: Failed to connect to broker at localhost:9092: Connection refused
+ [productor_kafka.c][line: 26] 
+Thu May 21 13:18:39 2015 RDKAFKA: localhost:9092/bootstrap: Failed to connect to broker at localhost:9092: Connection refused
+ [productor_kafka.c][line: 26] 
+Thu May 21 13:18:39 2015 RDKAFKA: 1/1 brokers are down
+ [productor_kafka.c][line: 26] 
+Thu May 21 13:18:39 2015 Creacion de estructura dinamica correcta [poller.c][line: 132] 
+Thu May 21 13:18:39 2015 Vamos a monitorizar 4 hosts [poller.c][line: 152] 
