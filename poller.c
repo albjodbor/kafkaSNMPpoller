@@ -82,13 +82,14 @@ int main () {
 	 * PRIMERO: configuración de kafka
 	 * Si no funciona reintentamos periódicamente sin lanzar el programa
 	 */
+
 	brokers = "localhost:9092";
 	topic = "snmp";
 
 	conf = rd_kafka_conf_new();
 	topic_conf = rd_kafka_topic_conf_new();
 	rd_kafka_conf_set_dr_cb(conf, msg_delivered);
-	/* Create Kafka handle */
+	// Create Kafka handle
 	rk = rd_kafka_new(RD_KAFKA_PRODUCER, conf, errstr, sizeof(errstr));
 	if (!(rk)) {
 		LOG_PRINT("Intento fallido para kafka handle");
@@ -98,11 +99,11 @@ int main () {
 		kafkaoff=0;
 	}
 
-	/* Set logger */
+	// Set logger
 	rd_kafka_set_logger(rk, logger_kafka);
 	rd_kafka_set_log_level(rk, LOG_DEBUG);
 
-	/* Add brokers */
+	// Add brokers
 	if (rd_kafka_brokers_add(rk, brokers) == 0) {
 		LOG_PRINT("Intento fallido para kafka broker");
 	}
@@ -110,12 +111,11 @@ int main () {
 		LOG_PRINT("Intento con exito para kafka broker");
 		brokeroff=0;
 	}
-	/* Create topic */
+	// Create topic
 	rkt = rd_kafka_topic_new(rk, topic, topic_conf);
 
 	//Antes de empezar, debemos lanzar un hilo que hago poll
 	//TODO: pthread_create(p_kafka_poll,NULL,poll_kafka,NULL);
-
 	//-----------------------------KAFKA-----------------------------
 
 	lista_host = procesa_fichero_host();
@@ -240,14 +240,16 @@ int main () {
 	//Sale cuando estamos en el ultimo nodo
 	pthread_join(lista_host_prov->thread,NULL);
 	pthread_join(lectura,NULL);
+
 	//Este es el ultimo hilo que debemos esperar
 	//TODO: pthread_join(kafka_poll,NULL);
+
 	//Finalizamos el productor KAFKA
-	/* Destroy topic */
+	// Destroy topic
 	rd_kafka_topic_destroy(rkt);
-	/* Destroy the handle */
+	// Destroy the handle
 	rd_kafka_destroy(rk);
-	/* Let background threads clean up and terminate cleanly. */
+	// Let background threads clean up and terminate cleanly.
 	rd_kafka_wait_destroyed(2000);
 
 	libera_host(lista_host);
