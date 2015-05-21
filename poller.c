@@ -7,6 +7,17 @@
  * TODO
  */
 
+
+/*
+ * TODO
+ * Recibo configuracion JSON
+ * Mas versiones SNMP
+ * Envio por kafka -- pruebas
+ * Hilo que haga POLL
+ */
+
+
+
 #include "poller.h"
 
 #include "estructura.h"
@@ -44,6 +55,8 @@ int main () {
 
 	pthread_t lectura;
 	pthread_t * p_lectura = &lectura;
+	pthread_t kafka_poll;
+	pthread_t * p_kafka_poll = &kafka_poll;
 
 	//Almacenara provisionalmente el puntero al hilo
 	pthread_t p_hilo_prov;
@@ -106,6 +119,9 @@ int main () {
 	}
 	/* Create topic */
 	rkt = rd_kafka_topic_new(rk, topic, topic_conf);
+
+	//Antes de empezar, debemos lanzar un hilo que hago poll
+	pthread_create(p_kafka_poll,NULL,poll_kafka,NULL);
 
 	//-----------------------------KAFKA-----------------------------
 
@@ -231,6 +247,8 @@ int main () {
 	//Sale cuando estamos en el ultimo nodo
 	pthread_join(lista_host_prov->thread,NULL);
 	pthread_join(lectura,NULL);
+	//Este es el ultimo hilo que debemos esperar
+	pthread_join(kafka_poll,NULL);
 	//Finalizamos el productor KAFKA
 	/* Destroy topic */
 	rd_kafka_topic_destroy(rkt);

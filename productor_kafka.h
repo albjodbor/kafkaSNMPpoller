@@ -13,3 +13,7 @@ void logger_kafka (const rd_kafka_t *rk, int level, const char *fac, const char 
  * hara de productor, y enviara la cadena pasada como parametro
  */
 void produce_msg (char * cadena);
+/*
+ * Funcion ejecutada por el hilo que ira haciendo poll
+ */
+void poll_kafka (void * thread_args);

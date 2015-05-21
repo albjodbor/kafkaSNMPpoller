@@ -79,5 +79,43 @@ void produce_msg (char * cadena) {
 
 
 }
+/*
+* Polls the provided kafka handle for events.
+*
+* Events will cause application provided callbacks to be called.
+*
+* The 'timeout_ms' argument specifies the minimum amount of time
+* (in milliseconds) that the call will block waiting for events.
+* For non-blocking calls, provide 0 as 'timeout_ms'.
+* To wait indefinately for an event, provide -1.
+*
+* Events:
+* - delivery report callbacks (if dr_cb is configured) [producer]
+* - error callbacks (if error_cb is configured) [producer & consumer]
+* - stats callbacks (if stats_cb is configured) [producer & consumer]
+*
+* Returns the number of events served.
+*/
+void poll_kafka (void * thread_args) {
+	//TODO -> ver como obtener tamanio del poll
+	while (fin) {
+		/**
+		* Returns the current out queue length:
+		* messages waiting to be sent to, or acknowledged by, the broker.
+		*/
+		if (rd_kafka_outq_len(rk) > 0)
+			rd_kafka_poll(rk, 0);
+	}
+	/*
+	 * Cuando llegamos a fin, tenemos que terminar de
+	 * hacer poll a los que quedan
+	 */
+	while (rd_kafka_outq_len(rk) > 0) {
+		rd_kafka_poll(rk, 0);
+	}
+	//TODO ¿Se sale cuando ha finalizado?
+}
+
+
 
 
