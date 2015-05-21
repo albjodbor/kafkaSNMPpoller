@@ -5,18 +5,11 @@
  * Descripción:
  * Trabajo fin de grado.
  * TODO
+ * 1) Comprobar que se haya abierto kafka
+ * 2) Recibo configuracion JSON
+ * 3) Envio por kafka -- pruebas
+ * 4) Mas versiones SNMP
  */
-
-
-/*
- * TODO
- * Recibo configuracion JSON
- * Mas versiones SNMP
- * Envio por kafka -- pruebas
- * Hilo que haga POLL
- */
-
-
 
 #include "poller.h"
 
@@ -82,7 +75,7 @@ int main () {
 
 	//Inicializamos el descriptor fdset vacio. fdset variable global
 	FD_ZERO(&fdset);
-//--------------CONFIGURACION--------------
+	//--------------CONFIGURACION--------------
 
 	//-----------------------------KAFKA-----------------------------
 	/*
@@ -121,7 +114,7 @@ int main () {
 	rkt = rd_kafka_topic_new(rk, topic, topic_conf);
 
 	//Antes de empezar, debemos lanzar un hilo que hago poll
-	pthread_create(p_kafka_poll,NULL,poll_kafka,NULL);
+	//TODO: pthread_create(p_kafka_poll,NULL,poll_kafka,NULL);
 
 	//-----------------------------KAFKA-----------------------------
 
@@ -248,7 +241,7 @@ int main () {
 	pthread_join(lista_host_prov->thread,NULL);
 	pthread_join(lectura,NULL);
 	//Este es el ultimo hilo que debemos esperar
-	pthread_join(kafka_poll,NULL);
+	//TODO: pthread_join(kafka_poll,NULL);
 	//Finalizamos el productor KAFKA
 	/* Destroy topic */
 	rd_kafka_topic_destroy(rkt);
