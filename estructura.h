@@ -5,7 +5,6 @@
 #include "poller.h"
 
 
-st_host * procesa_fichero_host ();
 void anida_host (st_host ** lugar, st_host * nodo);
 void anida_oid (st_oid ** lugar, st_oid * nodo);
 void libera_host (st_host * lista);

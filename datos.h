@@ -18,22 +18,35 @@
 //Libreria rdkafka
 #include <librdkafka/rdkafka.h>
 
+//Libreria jansson
+#include <jansson.h>
+
 
 typedef struct oid {
-  char Name[200];
+  char * name;
+  char * oid_name;
+
   oid Oid[MAX_OID_LEN];
   size_t OidLen;
+
   struct oid *next;
 }st_oid;
 
 typedef struct host {
-	char name[200];
-	char community[200];
-	st_oid *oids;
-	pthread_t thread;
+	char * name;
+	char * ip;
+	char * community;
+	char * version;
+
 	int corte;
+	int fallo_sesion;
+
 	struct snmp_session sesion;
 	struct snmp_session *punt_sesion;
-	int fallo_sesion;
+
+	pthread_t thread;
+
+	st_oid *oids;
+
 	struct host *next;
 }st_host;

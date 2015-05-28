@@ -38,8 +38,10 @@ void * poller (void * thread_args)
 		   * Al menos añadir version 1
 		   */
 
+
 		  lista_host_prov->sesion.version = SNMP_VERSION_2c;
-		  lista_host_prov->sesion.peername = strdup(lista_host_prov->name);
+
+		  lista_host_prov->sesion.peername = strdup(lista_host_prov->ip);
 
 		  lista_host_prov->sesion.community = (u_char*)strdup(lista_host_prov->community);
 		  lista_host_prov->sesion.community_len = strlen(lista_host_prov->community);
@@ -88,6 +90,7 @@ void * poller (void * thread_args)
 				  while (lista_oid_prov != NULL) {
 					  pregunta=NULL;
 					  pregunta = snmp_pdu_create(SNMP_MSG_GET);
+
 					  snmp_add_null_var(pregunta, lista_oid_prov->Oid, (int)lista_oid_prov->OidLen);
 
 					  if (!(snmp_send(lista_host_prov->punt_sesion, pregunta))) {
