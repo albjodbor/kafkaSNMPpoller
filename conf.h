@@ -4,5 +4,5 @@
 
 #include "poller.h"
 
-void carga_conf (int dummy);
-void carga_monitor (int dummy);
+void carga_conf ();
+void carga_monitor ();

@@ -1,4 +1,5 @@
 #include "poller_thread.h"
+#include "estructura.h"
 
 
 /*
@@ -10,6 +11,8 @@
 void * poller (void * thread_args)
 {
 
+	//Almaceno el puntero a los hosts
+	st_host * lista = (st_host *)thread_args;
 	//Banderas
 	int fin_lista = 1;
 	int corte = 1;
@@ -17,7 +20,7 @@ void * poller (void * thread_args)
 
 
 	//Punteros a la estructura
-	st_host * lista_host_prov = (st_host *)thread_args;
+	st_host * lista_host_prov = lista;
 	st_oid * lista_oid_prov;
 
 	struct snmp_pdu *pregunta;
@@ -34,11 +37,8 @@ void * poller (void * thread_args)
 
 		  /*
 		   * VERSION 2c de momento
-		   * TODO almacenar version en estructura dinamica
-		   * Al menos añadir version 1
+		   * TODO Al menos añadir version 1
 		   */
-
-
 		  lista_host_prov->sesion.version = SNMP_VERSION_2c;
 
 		  lista_host_prov->sesion.peername = strdup(lista_host_prov->ip);
@@ -46,8 +46,9 @@ void * poller (void * thread_args)
 		  lista_host_prov->sesion.community = (u_char*)strdup(lista_host_prov->community);
 		  lista_host_prov->sesion.community_len = strlen(lista_host_prov->community);
 
-		  //TODO Funcion de callback para cuando llega la pdu respuesta
+
 		  lista_host_prov->sesion.callback = procesa_pdu;
+		  lista_host_prov->sesion.callback_magic = lista_host_prov->oids;
 
 		  lista_host_prov->punt_sesion = snmp_open(&(lista_host_prov->sesion));
 
@@ -64,8 +65,9 @@ void * poller (void * thread_args)
 
 
 		  //Llegamos a corte o a NULL -> paramos el bucle
-		  if ((lista_host_prov->corte == 1)||(lista_host_prov->next==NULL))
+		  if ((lista_host_prov->corte == 1)||(lista_host_prov->next==NULL)) {
 			  corte = 0;
+		  }
 		  else
 			  lista_host_prov = lista_host_prov->next;
 
@@ -74,8 +76,10 @@ void * poller (void * thread_args)
 	//Todas las sesiones abiertas o marcadas para reintento
 
 	//BUCLE MONITORIZACION -> Finaliza solo ante Ctrl C
-	  while (fin) {
-		  lista_host_prov = (st_host *)thread_args;
+	  while ((fin)&&(recarga_config==0)) {
+
+		  lista_host_prov = lista;
+		  fin_lista = 1;
 		  do {
 			  //Si hemos llegado al ultimo host, levantamos la bandera
 			  if ((lista_host_prov->corte == 1) || (lista_host_prov->next == NULL))
@@ -92,11 +96,15 @@ void * poller (void * thread_args)
 					  pregunta = snmp_pdu_create(SNMP_MSG_GET);
 
 					  snmp_add_null_var(pregunta, lista_oid_prov->Oid, (int)lista_oid_prov->OidLen);
-
 					  if (!(snmp_send(lista_host_prov->punt_sesion, pregunta))) {
 						  snmp_perror("snmp_send");
 						  snmp_free_pdu(pregunta);
 					  }
+					  //Una vez enviada la pregunta, almaceno el id
+					  lista_oid_prov->enviado_id = pregunta->reqid;
+					  //TODO ¿Cuando libero la PDU?
+
+
 				  lista_oid_prov = lista_oid_prov->next;
 				  }
 				  //OID lanzados
@@ -121,6 +129,7 @@ void * poller (void * thread_args)
 					  lista_host_prov->sesion.community = (u_char*)strdup(lista_host_prov->community);
 					  lista_host_prov->sesion.community_len = strlen(lista_host_prov->community);
 					  lista_host_prov->sesion.callback = procesa_pdu;
+					  lista_host_prov->sesion.callback_magic = lista_host_prov->oids;
 					  lista_host_prov->punt_sesion = snmp_open(&(lista_host_prov->sesion));
 
 					  	if (!(lista_host_prov->punt_sesion)) {
@@ -136,10 +145,9 @@ void * poller (void * thread_args)
 
 			  lista_host_prov = lista_host_prov->next;
 
+			  //Antes de terminar, desbloqueo mutex
 		  } while (fin_lista);
 		  //Acabamos de terminar la lista de host
-
-		  //TODO -> Intervalo de monitorizacion global y desde fichero
 		  //Esperamos el tiempo indicado -> INTERVALO MONITORIZACION
 		  sleep(t_monitor);
 
@@ -189,38 +197,33 @@ void * poller (void * thread_args)
  * 		4)struct snmp_pdu* pdu			--> a pointer to PDU information. You must copy the information because it will be freed elsewhere
  * 		5)void* magic					--> a pointer to the data for callback()
  */
+//TODO mirar copia informacion con kafka
 int procesa_pdu(int operation, struct snmp_session *sp, int reqid, struct snmp_pdu *pdu, void *magic) {
-	//TODO
+
+	int fin_busca = 1;
+
+	st_oid * lista_oid_prov = (st_oid *)magic;
+
 	netsnmp_variable_list * vars;
 
-	if (operation == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
-		//Solo cuando hemos recibido pdu snmp
-		print_result(STAT_SUCCESS, sp, pdu);
+	//2) Buscamos el oid por el id de la pregunta
+	while ((lista_oid_prov->enviado_id != reqid)||fin_busca==0) {
+		if(lista_oid_prov->next==NULL)
+			fin_busca=0;
+		lista_oid_prov=lista_oid_prov->next;
 	}
-/*
-	//Variables para tiempo
-	time_t rawtime;
-	struct tm * timeinfo;
-
-	int count=1;
-
-	//Variables para los tipos de datos
-	unsigned long long * result;
-
-	for(vars = pdu->variables; vars; vars = vars->next_variable) {
-		//Antes de imprimir, obtenemos el tiempo
-		time ( &rawtime );
-		timeinfo = localtime ( &rawtime );
-
-		 char *sp = NULL;
-		 sp = malloc(1 + vars->val_len);
-		 memcpy(sp, vars->val.string, vars->val_len);
-		 sp[vars->val_len] = '\0';
-		 fprintf(stdout,"%s \t tipo %d -->  %s\n",asctime (timeinfo), vars->type ,sp);
-		 free(sp);
+	if (fin_busca) {
+		//Hemos encontrado el OID
+		if (!(lista_oid_prov->enviado_id == lista_oid_prov->ultimo_reqid)) {
+			//Si no son iguales, lo guardo y lo imprimo
+			lista_oid_prov->ultimo_reqid=reqid;
+			if (operation == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+				print_result(STAT_SUCCESS, sp, pdu);
+			}
+		}
+		//Si son iguales no hago nada
 	}
-*/
-	 return 0;
+ return 0;
 }
 
 /*

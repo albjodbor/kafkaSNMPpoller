@@ -39,6 +39,10 @@ int procesa_pdu(int operation, struct snmp_session *sp, int reqid, struct snmp_p
  */
 void * hilo_lectura (void * thread_args);
 
-
+/*
+ * Funcion: nt print_result (int status, struct snmp_session *sp, struct snmp_pdu *pdu)
+ *
+ * 		Funcion provisional que imprime la PDU recibida por pantalla
+ */
 
 int print_result (int status, struct snmp_session *sp, struct snmp_pdu *pdu);

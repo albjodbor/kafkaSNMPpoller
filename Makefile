@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS= -g
 PROG = poller
-HEADERS = poller.h datos.h estructura.h logger.h poller_thread.h productor_kafka.h conf.h
-PROGO = poller.o estructura.o logger.o poller_thread.o productor_kafka.o conf.o
+HEADERS = poller.h datos.h estructura.h logger.h poller_thread.h productor_kafka.h conf.h carga_conf.h
+PROGO = poller.o estructura.o logger.o poller_thread.o productor_kafka.o conf.o carga_conf.o
 LIB = -lpthread -lsnmp -lrdkafka -lz -lrt -ljansson
 
 default: $(PROG)
@@ -27,6 +27,9 @@ productor_kafka.o: productor_kafka.c productor_kafka.h datos.h
 	
 conf.o: conf.c conf.h datos.h
 	$(CC) $(CFLAGS) -c conf.c $(LIB)
+	
+carga_conf.o: carga_conf.c carga_conf.h datos.h
+	$(CC) $(CFLAGS) -c carga_conf.c $(LIB)
 	
 clean:
 	$(RM) *.o $(PROG) *~

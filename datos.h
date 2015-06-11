@@ -10,15 +10,16 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 //Libreria de NET_SNMP
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
-//Libreria rdkafka
+//Libreria para producir mansajes KAFKA
 #include <librdkafka/rdkafka.h>
 
-//Libreria jansson
+//Libreria para parsear fichero JSON
 #include <jansson.h>
 
 
@@ -28,6 +29,9 @@ typedef struct oid {
 
   oid Oid[MAX_OID_LEN];
   size_t OidLen;
+
+  int enviado_id;
+  int ultimo_reqid;
 
   struct oid *next;
 }st_oid;

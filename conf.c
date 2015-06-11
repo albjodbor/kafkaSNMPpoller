@@ -3,10 +3,10 @@
 
 
 /*
- * Funcion handler
+ * Funcion: void carga_monitor ()
  * Parseara el fichero de monitorizacion
  */
-void carga_monitor (int dummy) {
+void carga_monitor () {
 	//TODO por linea de comandos
 	char rutaconf [] = "./monitor.json";
 	json_error_t error;
@@ -305,10 +305,10 @@ void carga_monitor (int dummy) {
 }
 
 /*
- * Funcion handler
+ * Funcion: void carga_conf ()
  * Parseara el fichero de configuracion
  */
-void carga_conf (int dummy) {
+void carga_conf () {
 
 	/*
 	 * Inicializa los valores de configuracion general:
